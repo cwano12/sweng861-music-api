@@ -1,0 +1,36 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Music API",
+        "description": "SWENG861 project",
+        "license": {
+            "name": "ISC",
+            "url": "https://opensource.org/licenses/ISC"
+        }
+    },
+    "servers": [],
+    "tags": [
+        {
+            "name": "Music API",
+            "description": "api endpoints"
+        }
+    ],
+    "paths": {
+        "/healthcheck": {
+            "get": {
+                "tags": ["healthcheck"],
+                "summary": "returns 'Health is good'",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+        }
+    }
+}

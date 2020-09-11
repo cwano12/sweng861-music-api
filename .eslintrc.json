@@ -1,0 +1,34 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "extends": [
+    "airbnb-typescript/base",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:import/typescript",
+    "plugin:prettier/recommended",
+    "prettier/@typescript-eslint"
+  ],
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": [1, { "singleQuote": true, "tabWidth": 4 }],
+    "@typescript-eslint/no-inferrable-types": "off",
+    "no-unused-vars": "warn",
+    "import/prefer-default-export": "off",
+    "class-methods-use-this": "off",
+    "prefer-destructuring": "off",
+    "no-underscore-dangle": "off",
+    "no-restricted-syntax": "off",
+    "no-await-in-loop": "off",
+    "guard-for-in": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-continue": "off",
+    "prefer-promise-reject-errors": "off",
+    "default-case": "off"
+  }
+}
