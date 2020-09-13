@@ -23,6 +23,6 @@ RUN npm install --production
 
 COPY --from=build /usr/src/app/dist ./dist
 
-EXPOSE 8010
+EXPOSE 3000
 
 CMD ["npm", "start"]

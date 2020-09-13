@@ -25,6 +25,10 @@ export class App {
         this.app.set('port', APP.PORT);
         this.app.set('host', APP.HOST);
 
+        // prettifies the json response
+        this.app.set('json spaces', 2);
+
+        // set up middleware
         this.app.use(bodyParser.urlencoded({ extended: true }));
         this.app.use(bodyParser.json());
 

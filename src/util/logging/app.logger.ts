@@ -1,5 +1,6 @@
-import { getLogger, Logger } from 'log4js';
-import { APP } from '../../config/app.constants';
+import { getLogger, Logger, configure } from 'log4js';
+import path from 'path';
+import { LOGGING } from '../../config/logging.constants';
 import { AppLoggerLevel } from './enum/app-logger-level.enum';
 
 /**
@@ -22,11 +23,31 @@ export class AppLogger {
      * @constructor
      * @param {string} fileName - The name of the file or class that is instantiating the logger
      */
-    constructor(fileName: string) {
+    constructor(fileName: string, logToFile = LOGGING.LOG_OUTPUT_TO_FILE) {
         this.fileName = fileName;
         this.logger = getLogger(this.fileName);
         // default logging level to LOG_LEVEL env var
-        this.logger.level = APP.LOG_LEVEL;
+        this.logger.level = LOGGING.LOG_LEVEL;
+
+        // if logs need to be output to file, configure log files
+        if (logToFile) {
+            configure({
+                appenders: {
+                    file: {
+                        type: 'file',
+                        filename: path.join(LOGGING.LOG_FILE_DIR, LOGGING.LOG_FILE_NAME),
+                        category: 'default',
+                        maxLogSize: LOGGING.LOG_MAX_SIZE,
+                        backups: LOGGING.LOG_BACKUPS,
+                        keepFileExt: true
+                    }
+                },
+                categories: {
+                    default: { appenders: ['file'], level: LOGGING.LOG_LEVEL }
+                }
+            });
+        }
+
         AppLogger.instances.push(this);
     }
 
@@ -84,7 +105,7 @@ export class AppLogger {
     private static validateLogLevel(logLevel: string): string {
         if (!(Object.values(AppLoggerLevel) as string[]).includes(logLevel.toLowerCase())) {
             // if not a valid log level, set to default
-            logLevel = APP.LOG_LEVEL;
+            logLevel = LOGGING.LOG_LEVEL;
         }
         return logLevel.toLowerCase();
     }

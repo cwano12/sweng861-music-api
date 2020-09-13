@@ -2,7 +2,7 @@
 
 ## Overview
 
-This application is a TypeScript REST API developed for the SWENG861 class project.  The application takes in artist names and song names and returns information about the artist and about the song.
+This application is a TypeScript REST API developed for the SWENG861 class project.  The application takes in artist names and song names and returns information form the Napster API about the artist and about the song.
 
 ## Architecure
 
@@ -11,8 +11,7 @@ This application is a TypeScript REST API developed for the SWENG861 class proje
 
 ## Development
 
-The Node version is 12.x and the TypeScript code is transpiled to es2017 to take advantage of [zero-cost async stack traces](https://docs.google.com/document/d/13Sy_kBIJGP0XT34V1CV3nkWya4TwYx9L3Yv45LdGB6Q/edit).  This helps improve debugging by showing async function calls in the stacktrace, whereas before, async calls
-showed up as anonymous.
+The Node version is 12.x and the TypeScript code is transpiled to es2017 to take advantage of [zero-cost async stack traces](https://docs.google.com/document/d/13Sy_kBIJGP0XT34V1CV3nkWya4TwYx9L3Yv45LdGB6Q/edit).  This helps improve debugging by showing async function calls in the stacktrace, whereas before, async calls showed up as anonymous.
 
 Below is a diagram of the main app components and how they interact with each other and the components external to the application:
 
@@ -66,13 +65,20 @@ Once the server is running, the app can be reached at <http://localhost:3000> th
 
 /healthcheck - healthcheck endpoint; displays 'Health is good'
 
+/artists/{artistName} - returns information about an artist based on artist name passed in
+
+/tracks/{songTitle} - returns a list of tracks matching song title passed in
+
+/admin/logging/{logLevel} - allows user to change the log level
+
 Navigate to <http://localhost:3000/swagger> to test the endpoints.
 
 You should see the following:
 
 ![example /swagger page](docs/Swagger%20UI%20example.png)
 
-You can test each endpoint by clicking *GET* (or POST) *> Try it out* and then scrolling down and clicking *Execute*.
+You can test each endpoint by clicking *GET*  *> Try it out* and then scrolling down and clicking *Execute*. Note: for **/tracks** and **/artists**,
+a song title or artist name needs to be entered into the text field under *Parameters* before clicking *Execute*.
 
 ## Testing
 
@@ -93,3 +99,6 @@ to see all individual tests:
 ## To Do
 
 - tests
+- add a UI
+- add pagination
+- add logic to filter tracks by artist name

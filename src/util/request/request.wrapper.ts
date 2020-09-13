@@ -13,7 +13,7 @@ export class RequestWrapper {
 
     /**
      * Sends the request using request-promise-native
-     * @param {ConversationRequestOptions} options - request options; modeled off of options from request package
+     * @param {MusicRequestOptions} options - request options; modeled off of options from request package
      * @param {string} customMessage - custom message to use in the event of an error
      * @returns {rpn.FullResponse} response
      *

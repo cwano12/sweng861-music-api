@@ -27,10 +27,180 @@
                     }
                 }
             }
+        },
+        "/artist/{artistName}": {
+            "get": {
+                "tags": ["artists"],
+                "summary": "returns information about an artist based on artist name",
+                "parameters": [ 
+                    {
+                        "name": "artistName",
+                        "in": "path",
+                        "description": "name of artist to return",
+                        "required": true,
+                        "schema": {
+                        "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Artist"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tracks/{songTitle}": {
+            "get": {
+                "tags": ["tracks"],
+                "summary": "returns list of tracks based on song title",
+                "parameters": [ 
+                    {
+                        "name": "songTitle",
+                        "in": "path",
+                        "description": "name of song to search for",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Gwen Stefani"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Track"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/logging/{logLevel}": {
+            "get": {
+                "tags": ["admin"],
+                "summary": "admin endpoint to change log level",
+                "parameters": [
+                    {
+                        "name": "logLevel",
+                        "in": "path",
+                        "description": "the log level to set logging to",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Log level is now set to {logLevel}."
+                    }
+                }
+            }
         }
     },
     "components": {
         "schemas": {
+            "Artist": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "the id of the artist",
+                        "example": "art.12345"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "artist's full name",
+                        "example": "Artist Name"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "description": "info about the artist",
+                        "example": "This is an artist that sings songs."
+                    },
+                    "albumName": {
+                        "type": "string",
+                        "description": "name of the album the track appears on",
+                        "example": "Artist Album"
+                    },
+                    "albums": {
+                        "type": "array",
+                        "description": "name of albums associated with the artist",
+                        "example": ["Album 1", "Album 2"],
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "image": {
+                        "type": "string",
+                        "description": "link to an image of the artist",
+                        "example": "http://image-host/img/356x237/8/8/3/5/9825388_356x237.jpg"
+                    }
+                }
+            },
+            "Track": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "the id of the track",
+                        "example": "tra.123456789"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "song title",
+                        "example": "Song Title"
+                    },
+                    "releaseDate": {
+                        "type": "string",
+                        "description": "date of release for the track's album",
+                        "example": "Thur Jan 01 1970"
+                    },
+                    "albumName": {
+                        "type": "string",
+                        "description": "name of the album the track appears on",
+                        "example": "Artist Album"
+                    },
+                    "artistName": {
+                        "type": "string",
+                        "description": "name of artist for the track",
+                        "example": "The Artist"
+                    },
+                    "length": {
+                        "type": "string",
+                        "description": "length of song in minutes",
+                        "example": "1:23"
+                    },
+                    "audioSnippet": {
+                        "type": "string",
+                        "description": "link to 30-second audio clip",
+                        "example": "http://audio-host/g1/2/3/4/5/6/1234567890.mp3"
+                    },
+                    "genres": {
+                        "type": "array",
+                        "description": "name of genres the song belongs to",
+                        "example": ["Genre 1", "Genre 2"],
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     }
 }

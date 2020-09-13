@@ -9,5 +9,5 @@ export const MUSIC = {
     ARTISTS_URL: process.env.ARTISTS_URL || '/artists/',
     ALBUMS_URL: process.env.ALBUMS_URL || '/albums/',
     GENRES_URL: process.env.GENRES_URL || '/genres/',
-    API_KEY: process.env.API_KEY
-}
+    API_KEY: process.env.API_KEY || 'YTkxZTRhNzAtODdlNy00ZjMzLTg0MWItOTc0NmZmNjU4Yzk4'
+};

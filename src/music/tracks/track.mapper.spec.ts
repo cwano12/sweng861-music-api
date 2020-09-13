@@ -13,8 +13,10 @@ describe('TrackMapper', () => {
     describe('parseTrackLengthMinutes', () => {
         describe('parsing track length minutes with playback seconds less than 10', () => {
             it('should return a value in seconds prepended with 0', () => {
-                const testLength: string = testMapper.parseTrackLengthMinutes(Math.floor(Math.random() * 10));
-                console.log(testLength);
+                const testLength: string = testMapper.parseTrackLengthMinutes(
+                    Math.floor(Math.random() * 10)
+                );
+
                 expect(testLength.split(':')[1].charAt(0)).toBe('0');
             });
         });
@@ -24,7 +26,7 @@ describe('TrackMapper', () => {
                 const testLength: string = testMapper.parseTrackLengthMinutes(
                     Math.floor(Math.random() * 60)
                 );
-                console.log(testLength);
+
                 expect(Number(testLength.split(':')[0])).toBeLessThan(1);
             });
         });
@@ -32,7 +34,7 @@ describe('TrackMapper', () => {
         describe('parsing track length minutes with playback seconds greater than 60', () => {
             it('should return a value greater than one minute', () => {
                 const testLength: string = testMapper.parseTrackLengthMinutes(61);
-                console.log(testLength);
+
                 expect(Number(testLength.split(':')[1])).toBeGreaterThan(0);
                 expect(Number(testLength.split(':')[0])).toBeGreaterThanOrEqual(1);
             });

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import express, { Request, Response, Application, Router } from 'express';
+import { MusicService } from '../music/music.service';
 import { AppLogger } from '../util/logging/app.logger';
 import { RouterProperties } from './router-properties';
 
@@ -9,8 +10,8 @@ import { RouterProperties } from './router-properties';
  *
  * @member {AppLogger} logger - logger for this class
  * @member {experss.Router} router - express router implementation
- * @static @member service - service to be used by the route handlers
- * @static @member instance - class field to track instances of this class;
+ * @static @member {MusicService} service - instance of MusicService to be used by the route handlers
+ * @static @member {AppRouter} instance - class field to track instances of this class;
  * helps to enforce Singleton pattern
  */
 export class AppRouter {
@@ -20,7 +21,7 @@ export class AppRouter {
 
     static app: Application;
 
-    static service: any;
+    static service: MusicService;
 
     static instance: AppRouter;
 
@@ -53,30 +54,6 @@ export class AppRouter {
     }
 
     /**
-     * route handler for displaying 'Hello World!'
-     * @param {express.Request} req - request object
-     * @param {express.Response} res  - response object
-     */
-    helloWorldHandler(req: Request, res: Response): void {
-        res.status(200).send(AppRouter.service.getHello());
-    }
-
-    /**
-     * route handler for sending test request to reqres.in test API;
-     * demonstrates the use of RequestPromiseWrapper to send requests
-     * @param {express.Request} req - request object
-     * @param {express.Response} res - response object
-     */
-    async testRequestHandler(req: Request, res: Response): Promise<void> {
-        try {
-            res.status(200).send(await AppRouter.service.sendTestRequest());
-        } catch (error) {
-            // some error types have status; others have statusCode; some have no status - default to 500
-            res.status(error.status || error.statusCode || 500).send(error.message);
-        }
-    }
-
-    /**
      * route handler for changing log level
      * @param {express.Request} req - request object
      * @param {express.Response} res - response object
@@ -89,22 +66,54 @@ export class AppRouter {
     }
 
     /**
+     * route handler for getting tracks
+     * @param {express.Request} req - request object
+     * @param {express.Response} res - response object
+     */
+    async tracksHandler(req: Request, res: Response): Promise<void> {
+        try {
+            res.status(200).send(
+                await AppRouter.service.getTracksByName(req.params.songTitle)
+            );
+        } catch (error) {
+            // some error types have status; others have statusCode; some have no status - default to 500
+            res.status(error.status || error.statusCode || 500).send(error.message);
+        }
+    }
+
+    /**
+     * route handler for getting artists
+     * @param {express.Request} req - request object
+     * @param {express.Response} res - response object
+     */
+    async artistsHandler(req: Request, res: Response): Promise<void> {
+        try {
+            res.status(200).send(
+                await AppRouter.service.getArtistByName(req.params.artistName)
+            );
+        } catch (error) {
+            // some error types have status; others have statusCode; some have no status - default to 500
+            res.status(error.status || error.statusCode || 500).send(error.message);
+        }
+    }
+
+    /**
      * initializer for AppRouter; sets up route mappings
      * @param {express.Application} app - instance of express application; used to
      * add this router as middleware
      */
     init(): void {
         /**
-         * route for displaying 'Hello World!'
-         * @route 'GET /'
+         * tracks route
+         * @route 'GET /tracks/:songTitle'
          */
-        this.router.get('/', this.helloWorldHandler);
+        this.router.get('/tracks/:songTitle', this.tracksHandler);
 
         /**
-         * route for demonstrating sending a request; hits a test API called reqres.in
-         * @route 'GET /request'
+         * artists route
+         * @route 'GET /artist/:artistName'
          */
-        this.router.get('/request', this.testRequestHandler);
+        this.router.get('/artist/:artistName', this.artistsHandler);
 
         /**
          * healthcheck route

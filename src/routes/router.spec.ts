@@ -1,15 +1,15 @@
 import { Request } from 'jest-express/lib/request';
 import { Response } from 'jest-express/lib/response';
-import { mock, instance, when } from 'ts-mockito';
+import { mock, instance } from 'ts-mockito';
 import { Level } from 'log4js';
 import { AppRouter } from './router';
 import { App } from '../app';
 import { RouterProperties } from './router-properties';
 import { AppLogger } from '../util/logging/app.logger';
 import { AppLoggerLevel } from '../util/logging/enum/app-logger-level.enum';
-import { INVALID_LOG_LEVEL, TEST_RESPONSE } from '../util/test.constants';
-import { APP } from '../config/app.constants';
+import { INVALID_LOG_LEVEL } from '../util/test.constants';
 import { MusicService } from '../music/music.service';
+import { LOGGING } from '../config/logging.constants';
 
 let mockRequest: any;
 let mockResponse: any;
@@ -20,8 +20,6 @@ describe('AppRouter', () => {
         mockResponse = new Response() as any;
 
         const mockService = mock(MusicService);
-        when(mockService.getHello()).thenReturn('Hello World!');
-        when(mockService.sendTestRequest()).thenResolve(TEST_RESPONSE);
 
         const mockApp = mock(App).app;
         const mockProps: RouterProperties = {
@@ -69,42 +67,14 @@ describe('AppRouter', () => {
         });
 
         describe('changing log level with an invalid log level', () => {
-            it('should default to "APP.LOG_LEVEL"', () => {
-                APP.LOG_LEVEL = 'info';
+            it('should default to "LOGGING.LOG_LEVEL"', () => {
+                LOGGING.LOG_LEVEL = 'info';
                 const invalidLogLevel: string = INVALID_LOG_LEVEL;
                 mockRequest.params.logLevel = invalidLogLevel;
                 testRouter.loggingHandler(mockRequest, mockResponse);
                 expect(
                     ((AppLogger.instances[0].logger.level as unknown) as Level).levelStr
-                ).toBe(APP.LOG_LEVEL.toUpperCase());
-            });
-        });
-    });
-
-    describe('helloWorldHandler', () => {
-        describe('getting hello world message', () => {
-            it('should return a status of 200', () => {
-                testRouter.helloWorldHandler(mockRequest, mockResponse);
-                expect(mockResponse.status).toHaveBeenCalledWith(200);
-            });
-
-            it('should return hello world message', () => {
-                testRouter.helloWorldHandler(mockRequest, mockResponse);
-                expect(mockResponse.send).toHaveBeenCalledWith('Hello World!');
-            });
-        });
-    });
-
-    describe('testRequestHandler', () => {
-        describe('testing sending a request', () => {
-            it('should return status of 200', async () => {
-                await testRouter.testRequestHandler(mockRequest, mockResponse);
-                expect(mockResponse.status).toHaveBeenCalledWith(200);
-            });
-
-            it('should return a response', async () => {
-                await testRouter.testRequestHandler(mockRequest, mockResponse);
-                expect(mockResponse.send).toHaveBeenCalledWith(TEST_RESPONSE);
+                ).toBe(LOGGING.LOG_LEVEL.toUpperCase());
             });
         });
     });
