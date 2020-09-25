@@ -43,14 +43,15 @@ export class MusicService {
     }
 
     /**
-     * This method takes in an artist's name and returns information
-     * about that artist.
+     * This method takes in an artist's name and returns a list of
+     * information about artists that match that name.
      *
      * @param artistName - name of artist to retun info about
-     * @returns {Artist} - artist information
+     * @returns {Artist[]} - list of artist information
      */
-    async getArtistByName(artistName: string): Promise<Artist> {
+    async getArtistByName(artistName: string): Promise<Artist[]> {
         this.logger.info(`getting artist with name ${artistName}`);
+        const artists: Artist[] = [];
 
         // format artist name to include hyphens (this is expected by Napster API)
         const formattedName: string = artistName.split(' ').join('-');
@@ -69,33 +70,42 @@ export class MusicService {
         const customErrorMessage: string = `failed to get artist with name ${artistName}`;
 
         // get raw response from Napster
-        const artistResult: ArtistResponseDto = (
+        const results = (
             await this.requestWrapper.sendRequest(this.options, customErrorMessage)
-        ).body.artists[0];
+        ).body;
 
-        // get the image link
-        artistResult.links.images.href = await this.getImageLink(
-            artistResult.links.images.href
-        );
+        if (results.artists) {
+            const artistResults: ArtistResponseDto[] = results.artists;
 
-        // convert album ids to album names
-        const albums: Set<string> = new Set();
-        await Promise.all(
-            artistResult.albumGroups.main.map(async albumId => {
-                const albumName: string = (await this.getAlbumById(albumId)).name.replace(
-                    'XX',
-                    ''
-                );
-                albums.add(albumName);
-            })
-        );
+            await Promise.all(
+                artistResults.map(async artistResult => {
+                    // get the image link
+                    artistResult.links.images.href = await this.getImageLink(
+                        artistResult.links.images.href
+                    );
 
-        artistResult.albumGroups.main = Array.from(albums);
+                    // convert album ids to album names
+                    const albums: Set<string> = new Set();
+                    if (artistResult.albumGroups && artistResult.albumGroups.main) {
+                        await Promise.all(
+                            artistResult.albumGroups.main.map(async albumId => {
+                                const albumName: string = (
+                                    await this.getAlbumById(albumId)
+                                ).name.replace('XX', '');
+                                albums.add(albumName);
+                            })
+                        );
+                    }
 
-        // convert raw response to Artist model
-        const artist: Artist = new ArtistMapper().toModel(artistResult);
+                    artistResult.albumGroups.main = Array.from(albums);
+                    // convert raw response to Artist model
+                    const artist: Artist = new ArtistMapper().toModel(artistResult);
+                    artists.push(artist);
+                })
+            );
+        }
 
-        return artist;
+        return artists;
     }
 
     /**
@@ -107,6 +117,55 @@ export class MusicService {
      */
     async getTracksByName(trackName: string): Promise<Track[]> {
         this.logger.info(`getting tracks matching song title ${trackName}`);
+
+        const trackResults: TrackResponseDto[][] = (
+            await this.getTrackResults(trackName)
+        ).map(batch => batch.filter(track => track.name.toLocaleLowerCase() === trackName));
+
+        const tracks: Track[] = await this.mapTrackProperties(trackResults);
+
+        return tracks;
+    }
+
+    /**
+     * This method takes in a song title and an artist name and returns a list of tracks
+     * matching that title and artist.
+     *
+     * @param {string} trackName - name of song to search for
+     * @param {string} artistName - name of artist of song to search for
+     * @returns {Track[]} - list of tracks matching song title and artist name
+     */
+    async getTracksByNameAndArtist(trackName: string, artistName: string): Promise<Track[]> {
+        this.logger.info(
+            `getting tracks matching song title ${trackName} and artist ${artistName}`
+        );
+
+        const trackResults: TrackResponseDto[][] = (
+            await this.getTrackResults(trackName)
+        ).map(batch =>
+            batch.filter(
+                track =>
+                    track.name.toLocaleLowerCase() === trackName &&
+                    track.artistName === artistName
+            )
+        );
+
+        const tracks: Track[] = await this.mapTrackProperties(trackResults);
+
+        return tracks;
+    }
+
+    /**
+     * This method takes in a song title and returns the raw track results from Napster
+     * in batches.
+     *
+     * @param {string} trackName - title of song to search for
+     * @returns {TrackResponseDto[][]} - batches of raw track results from Napster
+     */
+    private async getTrackResults(trackName: string): Promise<TrackResponseDto[][]> {
+        // hold tracks in batches of 20
+        const trackResults: TrackResponseDto[][] = [];
+
         const tracksUrl: string = this.urlBuilder.getUrl(
             MUSIC.HOST,
             MUSIC.BASE_PATH,
@@ -121,31 +180,68 @@ export class MusicService {
         const customErrorMessage: string = `failed to get track with name ${trackName}`;
 
         // get raw response from Napster
-        const trackResults: TrackResponseDto[] = (
+        const results = (
             await this.requestWrapper.sendRequest(this.options, customErrorMessage)
-        ).body.search.data.tracks;
+        ).body;
 
+        // get total count
+        const count: number = results.meta.totalCount;
+
+        // get results from initial query
+        trackResults.push(results.search.data.tracks as TrackResponseDto[]);
+        // paginate through the rest of the results and add them
+        trackResults.push(
+            ...((await this.paginateTrackResults(
+                count,
+                customErrorMessage,
+                tracksUrl
+            )) as TrackResponseDto[][])
+        );
+
+        return trackResults;
+    }
+
+    /**
+     * This method maps raw track results to formatted track results.
+     *
+     * @param {TrackResponseDto[][]} trackBatches - batches of raw track results
+     * @returns {Track[]} - list of formatted tracks
+     */
+    private async mapTrackProperties(trackBatches: TrackResponseDto[][]): Promise<Track[]> {
         const tracks: Track[] = [];
 
+        // loop through each track in each batch and map genre and album information
         await Promise.all(
-            trackResults.map(async trackResult => {
-                // get release date from album
-                trackResult.releaseDate = (
-                    await this.getAlbumById(trackResult.albumId)
-                ).originallyReleased;
-
-                // convert genre ids to genre names
-                trackResult.links.genres.names = [];
+            // process no more than MUSIC.MAX_REUSLTS
+            trackBatches.slice(0, MUSIC.MAX_RESULTS).map(async batch => {
                 await Promise.all(
-                    trackResult.links.genres.ids.map(async genreId => {
-                        const genreName = (await this.getGenreById(genreId)).name;
-                        trackResult.links.genres.names.push(genreName);
+                    batch.map(async trackResult => {
+                        // get release date from album
+                        trackResult.releaseDate = (
+                            await this.getAlbumById(trackResult.albumId)
+                        ).originallyReleased;
+
+                        // convert genre ids to genre names
+                        if (trackResult.links.genres) {
+                            trackResult.links.genres.names = [];
+                            if (trackResult.links.genres && trackResult.links.genres.ids) {
+                                await Promise.all(
+                                    trackResult.links.genres.ids.map(async genreId => {
+                                        const genreName = (await this.getGenreById(genreId))
+                                            .name;
+                                        (trackResult.links.genres as any).names.push(
+                                            genreName
+                                        );
+                                    })
+                                );
+                            }
+                        }
+
+                        // convert raw response to Track model
+                        const track: Track = new TrackMapper().toModel(trackResult);
+                        tracks.push(track);
                     })
                 );
-
-                // convert raw response to Track model
-                const track: Track = new TrackMapper().toModel(trackResult);
-                tracks.push(track);
             })
         );
 
@@ -153,7 +249,7 @@ export class MusicService {
     }
 
     /**
-     * This method gets an album information based on the id passed in.
+     * This method gets album information based on the id passed in.
      *
      * @param albumId - id of the album to lookup
      */
@@ -228,5 +324,47 @@ export class MusicService {
         ).body.genres[0];
 
         return genre;
+    }
+
+    /**
+     * This method paginates through all track results and returns the results
+     * in batches with size of MUSIC.LIMIT.  This is necessary because Napster
+     * only returns no more than 20 results at a time.
+     *
+     * @param {number} count - total count returned from original query
+     * @param {string} customErrorMessage - error message to pass to request wrapper in the event of failure
+     * @param {string} musicUrl - track url from original query
+     */
+    private async paginateTrackResults(
+        count: number,
+        customErrorMessage: string,
+        musicUrl: string
+    ): Promise<TrackResponseDto[][] | ArtistResponseDto[][]> {
+        const results: any[][] = [];
+
+        if (count > MUSIC.LIMIT) {
+            let offset = MUSIC.LIMIT;
+            while (offset < count) {
+                const url = this.urlBuilder.getUrl(
+                    musicUrl,
+                    `&${MUSIC.LIMIT_QUERY}${MUSIC.LIMIT}&`,
+                    `${MUSIC.OFFSET_QUERY}${offset}`
+                );
+
+                this.options.uri = url;
+
+                const offsetResults = (
+                    await this.requestWrapper.sendRequest(this.options, customErrorMessage)
+                ).body;
+
+                if (offsetResults.search) {
+                    results.push(offsetResults.search.data.tracks as TrackResponseDto[]);
+                }
+
+                offset += MUSIC.LIMIT;
+            }
+        }
+
+        return results;
     }
 }

@@ -9,5 +9,9 @@ export const MUSIC = {
     ARTISTS_URL: process.env.ARTISTS_URL || '/artists/',
     ALBUMS_URL: process.env.ALBUMS_URL || '/albums/',
     GENRES_URL: process.env.GENRES_URL || '/genres/',
-    API_KEY: process.env.API_KEY || 'YTkxZTRhNzAtODdlNy00ZjMzLTg0MWItOTc0NmZmNjU4Yzk4'
+    API_KEY: process.env.API_KEY || 'YTkxZTRhNzAtODdlNy00ZjMzLTg0MWItOTc0NmZmNjU4Yzk4',
+    LIMIT_QUERY: 'limit=',
+    OFFSET_QUERY: 'offset=',
+    LIMIT: Number(process.env.LIMIT) || 20,
+    MAX_RESULTS: Number(process.env.MAX_RESULTS) || 20000
 };

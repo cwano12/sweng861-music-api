@@ -32,15 +32,16 @@
             "get": {
                 "tags": ["artists"],
                 "summary": "returns information about an artist based on artist name",
-                "parameters": [ 
+                "parameters": [
                     {
                         "name": "artistName",
                         "in": "path",
                         "description": "name of artist to return",
                         "required": true,
                         "schema": {
-                        "type": "string"
-                        }
+                            "type": "string"
+                        },
+                        "example": "my favorite artist"
                     }
                 ],
                 "responses": {
@@ -49,7 +50,10 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Artist"
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Artist"
+                                    }
                                 }
                             }
                         }
@@ -61,7 +65,7 @@
             "get": {
                 "tags": ["tracks"],
                 "summary": "returns list of tracks based on song title",
-                "parameters": [ 
+                "parameters": [
                     {
                         "name": "songTitle",
                         "in": "path",
@@ -70,7 +74,50 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "Gwen Stefani"
+                        "example": "my favorite song"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Track"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tracks/{songTitle}/{artistName}": {
+            "get": {
+                "tags": ["tracks"],
+                "summary": "returns list of tracks based on song title and artist name",
+                "parameters": [
+                    {
+                        "name": "songTitle",
+                        "in": "path",
+                        "description": "name of song to search for",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my favorite song"
+                    },
+                    {
+                        "name": "artistName",
+                        "in": "path",
+                        "description": "name of artist of the song to search for",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "my favorite song's artist"
                     }
                 ],
                 "responses": {

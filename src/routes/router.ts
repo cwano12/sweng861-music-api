@@ -66,14 +66,35 @@ export class AppRouter {
     }
 
     /**
-     * route handler for getting tracks
+     * route handler for getting tracks by title
      * @param {express.Request} req - request object
      * @param {express.Response} res - response object
      */
-    async tracksHandler(req: Request, res: Response): Promise<void> {
+    async tracksByTitleHandler(req: Request, res: Response): Promise<void> {
+        req.setTimeout(300000);
         try {
             res.status(200).send(
                 await AppRouter.service.getTracksByName(req.params.songTitle)
+            );
+        } catch (error) {
+            // some error types have status; others have statusCode; some have no status - default to 500
+            res.status(error.status || error.statusCode || 500).send(error.message);
+        }
+    }
+
+    /**
+     * route handler for getting tracks by title
+     * @param {express.Request} req - request object
+     * @param {express.Response} res - response object
+     */
+    async tracksByTitleAndArtistHandler(req: Request, res: Response): Promise<void> {
+        req.setTimeout(300000);
+        try {
+            res.status(200).send(
+                await AppRouter.service.getTracksByNameAndArtist(
+                    req.params.songTitle,
+                    req.params.artistName
+                )
             );
         } catch (error) {
             // some error types have status; others have statusCode; some have no status - default to 500
@@ -104,10 +125,16 @@ export class AppRouter {
      */
     init(): void {
         /**
-         * tracks route
+         * tracks by title route
          * @route 'GET /tracks/:songTitle'
          */
-        this.router.get('/tracks/:songTitle', this.tracksHandler);
+        this.router.get('/tracks/:songTitle', this.tracksByTitleHandler);
+
+        /**
+         * tracks by title and artist route
+         * @route 'GET /tracks/:songTitle/:artistName'
+         */
+        this.router.get('/tracks/:songTitle/:artistName', this.tracksByTitleAndArtistHandler);
 
         /**
          * artists route

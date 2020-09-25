@@ -16,7 +16,7 @@ export class ArtistResponseDto {
 
     name!: string;
 
-    bios!: Bio[];
+    bios?: Bio[];
 
     albumGroups!: { main: string[] };
 

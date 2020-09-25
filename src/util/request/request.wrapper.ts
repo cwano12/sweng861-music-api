@@ -22,6 +22,7 @@ export class RequestWrapper {
     async sendRequest(options: MusicRequestOptions, customMessage: string): Promise<any> {
         try {
             const response: rpn.FullResponse = await rpn(options);
+            this.logger.trace(JSON.stringify(response));
             return response;
         } catch (err) {
             this.logger.error(`${customMessage}: ${err.message}`);

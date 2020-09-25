@@ -32,7 +32,7 @@ export class TrackResponseDto {
     previewURL!: string;
 
     links!: {
-        genres: {
+        genres?: {
             ids: string[];
             names: string[];
         };

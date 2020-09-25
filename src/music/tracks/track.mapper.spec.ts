@@ -1,14 +1,29 @@
+import {
+    TEST_TRACK_WITH_GENRES,
+    TEST_TRACK_DTO_WITH_GENRES,
+    TEST_TRACK_DTO_NO_GENRES,
+    TEST_TRACK_NO_GENRES
+} from '../../util/test.constants';
+import { Track } from './track';
 import { TrackMapper } from './track.mapper';
 
 describe('TrackMapper', () => {
     const testMapper: TrackMapper = new TrackMapper();
-    // describe('toModel', () => {
-    //     describe('converting track response dto to track model', () => {
-    //         it('should return an instance of track', () => {
-    //             const testTrack: Track = testMapper.toModel;
-    //         });
-    //     });
-    // });
+    describe('toModel', () => {
+        describe('converting track response dto with genres to track model', () => {
+            it('should return an instance of track with genres', () => {
+                const testTrack: Track = testMapper.toModel(TEST_TRACK_DTO_WITH_GENRES);
+                expect(testTrack).toEqual(TEST_TRACK_WITH_GENRES);
+            });
+        });
+
+        describe('converting track response dto without genres to track model', () => {
+            it('should return an instance of track without genres', () => {
+                const testTrack: Track = testMapper.toModel(TEST_TRACK_DTO_NO_GENRES);
+                expect(testTrack).toEqual(TEST_TRACK_NO_GENRES);
+            });
+        });
+    });
 
     describe('parseTrackLengthMinutes', () => {
         describe('parsing track length minutes with playback seconds less than 10', () => {

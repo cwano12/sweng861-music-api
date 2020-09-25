@@ -24,7 +24,10 @@ export class TrackMapper {
             artistName: trackResponse.artistName,
             length: this.parseTrackLengthMinutes(trackResponse.playbackSeconds),
             audioSnippet: trackResponse.previewURL,
-            genres: trackResponse.links.genres.names
+            genres:
+                trackResponse.links.genres && trackResponse.links.genres.names
+                    ? trackResponse.links.genres.names
+                    : []
         };
 
         return new Track(trackProperties);
