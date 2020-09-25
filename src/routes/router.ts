@@ -110,7 +110,7 @@ export class AppRouter {
     async artistsHandler(req: Request, res: Response): Promise<void> {
         try {
             res.status(200).send(
-                await AppRouter.service.getArtistByName(req.params.artistName)
+                await AppRouter.service.getArtistsByName(req.params.artistName)
             );
         } catch (error) {
             // some error types have status; others have statusCode; some have no status - default to 500

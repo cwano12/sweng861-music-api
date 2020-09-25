@@ -49,7 +49,7 @@ export class MusicService {
      * @param artistName - name of artist to retun info about
      * @returns {Artist[]} - list of artist information
      */
-    async getArtistByName(artistName: string): Promise<Artist[]> {
+    async getArtistsByName(artistName: string): Promise<Artist[]> {
         this.logger.info(`getting artist with name ${artistName}`);
         const artists: Artist[] = [];
 
@@ -145,8 +145,7 @@ export class MusicService {
         ).map(batch =>
             batch.filter(
                 track =>
-                    track.name.toLocaleLowerCase() === trackName &&
-                    track.artistName === artistName
+                    track.name.toLowerCase() === trackName && track.artistName === artistName
             )
         );
 
@@ -189,7 +188,7 @@ export class MusicService {
 
         // get results from initial query
         trackResults.push(results.search.data.tracks as TrackResponseDto[]);
-        // paginate through the rest of the results and add them
+        // page through the rest of the results and add them
         trackResults.push(
             ...((await this.paginateTrackResults(
                 count,

@@ -63,13 +63,13 @@ or
 
 Once the server is running, the app can be reached at <http://localhost:3000> through the following endpoints:
 
-/healthcheck - healthcheck endpoint; displays 'Health is good'
-
-/artists/{artistName} - returns information about an artist based on artist name passed in
-
-/tracks/{songTitle} - returns a list of tracks matching song title passed in
-
-/admin/logging/{logLevel} - allows user to change the log level
+| Endpoint                               | Description
+| -------------------------------------- | -----------------------------------------------------------------------
+| **GET /healthcheck**                   | healthcheck endpoint; displays 'Health is good'
+| **GET /artists/:artistName**           | returns information about an artist based on artist name passed in
+| **GET /tracks/:songTitle**             | returns a list of tracks matching song title passed in
+| **GET /tracks/:songTitle/:artistName** | returns a list of tracks matching song title and artist name passed in
+| **GET /admin/logging/:logLevel**       | allows user to change the log level
 
 Navigate to <http://localhost:3000/swagger> to test the endpoints.
 
@@ -98,7 +98,4 @@ to see all individual tests:
 
 ## To Do
 
-- tests
-- add a UI
-- add pagination
-- add logic to filter tracks by artist name
+- integration tests
